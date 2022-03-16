@@ -1,0 +1,1196 @@
+//--------------------------------------
+//--- 010 Editor v3.0 Binary Template
+//
+// File: iv-types.bth
+// Author: Stanislav "listener" Golovin
+// Revision: 0.5 (2009/09/06)
+// Purpose: Common types for GTA IV resources
+//--------------------------------------
+
+// color coding -> current background color
+local uint currentColor = 0xFFC0C0;
+
+// ----- base pointers -----
+// relocated pointer to the virtual memory (CPU) segment
+struct pgPtr {
+    int offset:28 <format=hex>;
+    int type:4;
+    if (type == 5) {   
+        local uint doffset = FTell();
+        FSeek(offset);
+        byte DataStart;
+        FSeek(doffset);
+    }
+};
+
+// relocated pointer to the physical memory (GPU) segment
+typedef struct  {
+    int offset:28 <format=hex>;
+    int type:4;
+} pgPhysPtr <read=pgPhysPtr_read>;
+
+string pgPhysPtr_read (pgPhysPtr& p) {
+    string s;
+    if (p.type == 6)
+        SPrintf (s, "PHYS: 0x%x", p.offset);
+    else
+        SPtring (s, "0x%x", p.offset);
+    return s;
+}
+
+// pgPtr<char>
+typedef struct {
+    int offset: 28  <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        string data;
+        FSeek(doffset);        
+    }
+} pgPtr_String <read=PtrString_read>;
+
+string PtrString_read (pgPtr_String& ps) {
+    return ps.type == 5 ? ps.data : "";
+}
+
+// ### pgArray<DWORD> ###
+struct pgArray_DWORD {
+    int offset: 28  <format=hex>;
+    int type: 4;
+    WORD m_wCount;
+    WORD m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        DWORD data[m_wSize] <optimize=false>;
+        FSeek(doffset);        
+    }
+};
+
+// ### pgArray<float> ###
+struct pgArray_float {
+    int offset: 28  <format=hex>;
+    int type: 4;
+    WORD m_wCount;
+    WORD m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        float data[m_wSize] <optimize=false>;
+        FSeek(doffset);        
+    }
+};
+
+struct pgObjectArray {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    WORD    m_wCount;
+    WORD    m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        pgPtr data[m_wSize] <optimize=false>;
+        FSeek(doffset);        
+    }    
+};
+
+// === some math types ===
+typedef struct {
+    float x;
+    float y;
+    float z;
+} D3DVECTOR <read=D3DVECTOR_read>;
+string D3DVECTOR_read (D3DVECTOR& v) {
+    string s;
+    SPrintf (s, "<%f, %f, %f>", v.x, v.y, v.z);
+    return s;
+}
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float __pad; // SSE-aligned
+} Vector3 <read=Vector3_read>;
+string Vector3_read (Vector3& v) {
+    string s;
+    SPrintf (s, "<%f, %f, %f>", v.x, v.y, v.z);
+    return s;
+}
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float w;
+} Vector4 <read=Vector4_read>;
+string Vector4_read (Vector4& v) {
+    string s;
+    SPrintf (s, "<%f, %f, %f, %f>", v.x, v.y, v.z, v.w);
+    return s;
+}
+
+struct Matrix34 {
+    Vector3 a;
+    Vector3 b;
+    Vector3 c;
+    Vector3 d;
+};
+
+struct Matrix44 {
+    Vector4 a;
+    Vector4 b;
+    Vector4 c;
+    Vector4 d;
+};
+
+struct pgPtr_Matrix34 {
+    int offset: 28  <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        Matrix34 m;    
+        FSeek(doffset);        
+    }
+};
+
+struct pgArray_Matrix34 {
+    int offset: 28  <format=hex>;
+    int type: 4;
+    WORD    m_wCount;
+    WORD    m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        Matrix34 m[m_wSize]<optimize=false>;    
+        FSeek(doffset);        
+    }
+};
+
+struct pgObjectArray_Matrix34Array {
+    int offset: 28  <format=hex>;
+    int type: 4;
+    WORD    m_wCount;
+    WORD    m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        pgArray_Matrix34 m[m_wSize]<optimize=false>;    
+        FSeek(doffset);        
+    }
+};
+
+// ### rage::pgBase ###
+// pgBase::m_pOffsetMap
+struct pgPtr_OffsetMap {
+    int offset:28  <format=hex>;
+    int type:4;
+    if (type == 5) {   // RAM location
+        // SetBackColor (0xC0C0C0);
+        local uint doffset = FTell();
+        FSeek(offset);
+        DWORD OffsetMap[132];
+        FSeek(doffset);
+    }
+};
+
+struct pgBase {
+    DWORD   __vtbl;
+    pgPtr_OffsetMap   _f4;
+};
+
+// ### rage::grcTexturePC ###
+struct grcTexturePC {
+    DWORD   __vmt <format=hex>;
+    pgPtr_OffsetMap m_pOffsetMap;
+    // >> pgBase ends here
+    BYTE    _f8;
+    BYTE    m_nbDepth;
+    WORD    _fA;
+    DWORD   _fC;
+    DWORD   _f10;
+    pgPtr_String    m_pszName;
+    DWORD   m_piTexture;
+    WORD    m_wWidth;
+    WORD    m_wHeight;
+    char    m_dwPixelFormat[4];
+    WORD    m_wStride;
+    BYTE    m_eTextureType <read=TextureType_read>;
+    BYTE    m_nbLevels;
+    // >> grcTexture ends here
+    D3DVECTOR   _f28;
+    D3DVECTOR   _f34;
+    DWORD   m_pNext <format=hex>;
+    DWORD   m_pPrev <format=hex>;
+    pgPhysPtr   m_pPixelData;
+    BYTE    _f4C;
+    BYTE    _f4D;
+    BYTE    _f4E;
+    BYTE    _f4F;  
+};
+
+string TextureType_read (BYTE b) {
+    switch (b) {
+    case 1: return "CubeTexture";
+    case 3: return "VolumeTexture";
+    default: return "Texture";
+    }
+}
+
+// ### pgPtr<rage::grcTexturePC>
+struct pgPtr_grcTexturePC {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        grcTexturePC texture<optimize=false>;    // WARNING: crSkeletonData::m_bones points here
+        FSeek(doffset);        
+    }
+};
+
+// pgObjectArray<rage::grcTexturePC>
+struct pgObjectArray_grcTexture {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    WORD m_wCount;
+    WORD m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        pgPtr_grcTexturePC m_data[m_wSize] <optimize=false>;
+        FSeek(doffset);        
+    }
+};
+
+// rage::pgDictionary<rage::grcTexturePC>
+struct pgDictionary_grcTexturePC {
+    DWORD           __vmt;
+    pgPtr_OffsetMap m_pOffsetMap;
+    // >> pgBase ends here
+    DWORD           m_pParent;
+    DWORD           m_dwUsageCount;
+    pgArray_DWORD   m_hashes;
+    pgObjectArray_grcTexture    m_data;
+};
+
+// ### pgPtr<rage::pgDictionary<rage::grcTexturePC>> ###
+struct pgPtr_pgDictionary_grcTexturePC {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        pgDictionary_grcTexturePC txd<optimize=false>;    // WARNING: crSkeletonData::m_bones points here
+        FSeek(doffset);        
+    }
+};
+
+// ### rage::grmShaderFx ###
+struct grmShaderFx {
+    DWORD   __vmt <format=hex>;
+    pgPtr_OffsetMap m_pOffsetMap;
+    // >> pgBase ends here
+    BYTE    _f8;
+    BYTE    _f9;
+    BYTE    _fA;
+    BYTE    _fB;
+    WORD    _fC;
+    WORD    _fE;
+    DWORD   _f10;
+    // m_effect - struct grmShaderEffect {
+    // pgPtr   _f14; // pointer to pgPtr[_f1C]
+    struct {
+        DWORD   offset: 28 <format=hex>;
+        DWORD   type:4;
+        if (type == 5) {
+            local int doffset = FTell ();
+            local DWORD count = ReadUInt (doffset+4);   // read forward parameter count
+            FSeek (offset);
+            pgPtr pParams[count] <optimize=false>;
+            FSeek (doffset);
+        }
+    } m_ppParameters;
+    pgPtr   _f18;
+    DWORD   m_dwParameterCount;
+    DWORD   _f20; 
+    // pgPtr   m_pParameterTypes; // pointer to BYTE[_f1C] 
+    struct {
+        DWORD   offset: 28 <format=hex>;
+        DWORD   type:4;
+        if (type == 5) {
+            local int doffset = FTell ();
+            FSeek (offset);
+            BYTE    types[m_dwParameterCount] <optimize=false>;
+            FSeek (doffset);
+        }
+    } m_parameterTypes;
+    DWORD   _f28 <format=hex>; // hash
+    DWORD   _f2C;
+    DWORD   _f30;
+    pgPtr   m_pParameterNameHashes; // pointer to DWORD[_f1C]
+    DWORD   _f38;
+    DWORD   _f3C;
+    DWORD   _f40;
+    // }; // grmShaderEffect
+    // grmShader ends here
+    pgPtr_String   m_pszName;
+    pgPtr_String   m_pszSps;
+    pgPtr   _f4C;
+    pgPtr   _f50;
+    DWORD   _f54;
+    DWORD   _f58;
+};  
+
+struct pgPtr_grmShaderFx {
+    int offset: 28  <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        grmShaderFx shader<optimize=false>;    // WARNING: crSkeletonData::m_bones points here
+        FSeek(doffset);        
+    }
+};
+
+struct pgObjectArray_grmShaderFx {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    WORD    m_wCount;
+    WORD    m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        pgPtr_grmShaderFx data[m_wSize] <optimize=false>;
+        FSeek(doffset);        
+    }    
+};
+
+
+// ### rage::grmShaderGroup ###
+struct grmShaderGroup {
+    DWORD   __vmt <format=hex>;
+    pgPtr_pgDictionary_grcTexturePC   m_txd;
+    pgObjectArray_grmShaderFx   m_shaders;
+    pgObjectArray   _f10;
+    pgObjectArray   _f18;
+    pgObjectArray   _f20;
+    pgArray_DWORD   _f28;
+    pgArray_DWORD   _f30;
+    pgObjectArray_Matrix34Array   _f38; // TODO: possible another vector or matrix type
+    pgArray_DWORD   m_vertexFormats;
+    pgArray_DWORD   _f48;
+};
+
+struct pgPtr_grmShaderGroup {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        grmShaderGroup shaderGroup<optimize=false>;    // WARNING: crSkeletonData::m_bones points here
+        FSeek(doffset);        
+    }
+};
+
+// ### rage::crBone ###
+typedef struct {
+    pgPtr_String    m_pszBoneName;
+    WORD    _f4;
+    WORD    _f6;
+    pgPtr   m_pNextSibling; // from Spark IV
+    pgPtr   m_pFirstChild;  // from Spark IV
+    pgPtr   m_pParent;      // from Spark IV 
+    WORD    m_wBoneIndex;   // from Spark IV
+    WORD    m_wBoneId;
+    WORD    m_wMirror;
+    BYTE    _f1A;
+    BYTE    _f1B;
+    BYTE    _f1C;
+    BYTE    __pad_1D[3];
+    Vector3 m_vOffset;
+    Vector3 _f30;   // aru: vRotationEuler
+    Vector4 _f40;   // aru: vRotationQuaternion
+    Vector3 m_vScale;
+    Vector3 _f60;   
+    Vector3 m_vOrient;
+    Vector3 m_vSorient;
+    Vector3 m_vTransMin;
+    Vector3 m_vTransMax;
+    Vector3 m_vRotMin;
+    Vector3 m_vRotMax;
+    pgPtr   _fD0;
+    DWORD   _fD4;
+    DWORD   _fD8;
+    DWORD   _fDC;
+} crBone <read=crBone_read>;
+string crBone_read (crBone& b) {
+    return b.m_pszBoneName.data;
+}
+
+struct pgPtr_boneArray {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset-16);   
+        DWORD   __arraySize;    // compiler-generated
+        BYTE    __pad[12];
+        crBone  bones[__arraySize] <optimize=false>;    // WARNING: crSkeletonData::m_bones points here
+        FSeek(doffset);        
+    }        
+};
+
+struct BoneIdMapping {  // from SparkIV
+    WORD    ID;
+    WORD    index;
+};
+
+struct pgArray_BoneIdMapping {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    WORD    m_wCount;
+    WORD    m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        BoneIdMapping   mappings[m_wSize]<optimize=false>;
+        FSeek (doffset);
+    }
+};
+
+// ### rage::crJointData ###
+struct crJointData {
+    DWORD   __vmt<format=hex>;
+    DWORD   m_dwBoneId;
+    DWORD   m_dwJointDOFs;
+    BYTE    m_bUseTwistLimits;
+    BYTE    m_nbUsePerControlTwistLimits;
+    BYTE    _fE;
+    BYTE    _fF;
+    int     m_nNumControlPoints;
+    int     __pad_14[3];
+    Vector3 m_twistAxis;
+    float   m_fTwistLimitMin;
+    float   m_fTwistLimitMax;
+    float   m_fSoftLimitScale;
+    float   __pad_3C;
+    Vector4 _f40;    
+    struct crJointControlPoint {
+        float   fMaxSwing;
+        float   fMinTwist;
+        float   fMaxTwist;
+    } m_controlPoints[8] <optimize=false>;
+    Vector3 m_zeroRotationEulers;
+};
+
+struct pgPtr_crJointData {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        crJointData  data;
+        FSeek(doffset);        
+    }    
+};
+
+struct pgObjectArray_crJointData {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    WORD    m_wCount;
+    WORD    m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        pgPtr_crJointData   mappings[m_wSize]<optimize=false>;
+        FSeek (doffset);
+    }
+};
+
+// ### rage::crJointDataFile ###
+struct crJointDataFile {
+    DWORD   __vmt <format=hex>;
+    pgObjectArray_crJointData   m_jointData; 
+};
+
+// ### rage::crSkeletonData ###
+struct crSkeletonData {
+    local int offset1;  
+
+    pgPtr_boneArray m_bones;
+    struct {    // pointer to DWORD[m_wBoneCount]
+        int _f4_offset: 28;
+        int _f4_type: 4;
+        if (_f4_type == 5) {
+            offset1 = FTell ();
+            FSeek (_f4_offset);
+            DWORD   _f4_data[m_bones.__arraySize] <optimize=false>;
+            FSeek (offset1);
+        }
+    } _f4;
+    struct {    // pointer to Matrix34[m_wBoneCount]
+        int _f8_offset: 28;
+        int _f8_type: 4;
+        if (_f8_type == 5) {
+            offset1 = FTell ();
+            FSeek (_f8_offset);
+            Matrix34   _f8_data[m_bones.__arraySize] <optimize=false>;
+            FSeek (offset1);
+        }
+    } _f8;
+    struct {    // pointer to Matrix34[m_wBoneCount]
+        int _fC_offset: 28;
+        int _fC_type: 4;
+        if (_fC_type == 5) {
+            offset1 = FTell ();
+            FSeek (_fC_offset);
+            Matrix34   _fC_data[m_bones.__arraySize] <optimize=false>;
+            FSeek (offset1);
+        }
+    } _fC;
+    struct {    // pointer to Matrix34[m_wBoneCount]
+        int _f10_offset: 28;
+        int _f10_type: 4;
+        if (_f10_type == 5) {
+            offset1 = FTell ();
+            FSeek (_f10_offset);
+            Matrix34   _f10_data[m_bones.__arraySize] <optimize=false>;
+            FSeek (offset1);
+        }
+    } _f10;
+    WORD    m_wBoneCount;
+    WORD    _f16;
+    WORD    _f18;
+    WORD    _f1A;
+    DWORD   _f1C;
+    pgArray_BoneIdMapping   m_mapping;// aru: boneIdMappings 
+    WORD    m_wUsageCount;
+    WORD    _f2A;
+    DWORD   _f2C;
+    DWORD   _f30;
+    crJointDataFile m_joints;
+};
+
+struct pgPtr_crSkeletonData {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        crSkeletonData  data;
+        FSeek(doffset);        
+    }
+};
+
+// ### rage::grcIndexBufferD3D ###
+struct grcIndexBufferD3D {
+    DWORD       _vmt <format=hex>;
+    DWORD       m_dwIndexCount;
+    pgPhysPtr   m_pIndexData;
+    // >> grcIndexBuffer ends here
+    DWORD       m_piIndexBuffer;
+
+    SetBackColor (0xD0D0D0);    //  uninitialized area (same as uninitialized data in grcVertexBufferD3D ?)
+    DWORD       m_dwCacheHandle;
+    DWORD       _f14;
+    DWORD       _f18;
+    DWORD       m_pPrev;
+    DWORD       m_pNext;
+    DWORD       _f24;
+    DWORD       _f28;
+    DWORD       _f2C;
+    SetBackColor (0xFFC0C0); // end of the initialized area
+};
+
+struct pgPtr_grcIndexBufferD3D {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        grcIndexBufferD3D geometry;
+        FSeek(doffset);        
+    }
+};
+
+// ## grcVertexFormat ##
+struct grcVertexFormat {
+    WORD    wMask <format=hex>; // bit mask of the used fvfIndices
+    WORD    __pad_2;
+    WORD    wVertexSize;
+    BYTE    _f6;
+    BYTE    nbVertexDeclarationCount; // number of '1's in nbMask
+    BYTE    fvfIndices[8] <format=hex>; // 16 fields, 4 bits each - index in the FVF table
+};
+
+typedef struct  {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);   
+        grcVertexFormat  data;
+        FSeek(doffset);        
+    }
+} pgPtr_grcVertexFormat <read=pgPtr_grcVertexFormat_read>;
+string pgPtr_grcVertexFormat_read (pgPtr_grcVertexFormat& pf) {
+    string s;
+    if (pf.type == 5) 
+        SPrintf (s, "MASK: 0x%04x, SIZE: %d", pf.data.wMask, pf.data.wVertexSize);
+    else
+        SPrintf (s, "-none-");
+    return s;
+}
+
+
+// ### rage::grcVertexBufferD3D ###
+struct grcVertexBufferD3D {
+    DWORD       _vmt <format=hex>;
+    WORD        m_wVertexCount;
+    BYTE        m_bLocked;
+    BYTE        _f7;
+    pgPhysPtr   m_pLockedData;
+    DWORD       m_dwVertexSize;
+    pgPtr_grcVertexFormat       m_pVertexFormat;
+    DWORD       m_hLockThreadId;
+    pgPhysPtr   m_pVertexData;
+    // >> grcVertexBuffer ends here
+    DWORD       m_piVertexBuffer;
+    SetBackColor (0xD0D0D0);    //  uninitialized area
+    DWORD       m_dwCacheHandle;
+    DWORD       m_eD3DPool;
+    DWORD       m_dwLockFlags;
+    DWORD       m_pPrev;
+    DWORD       m_pNext;
+    DWORD       _f34;
+    DWORD       _f38;
+    DWORD       _f3C;
+    SetBackColor (0xFFC0C0); // end of the initialized area
+};
+
+struct pgPtr_grcVertexBufferD3D {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        grcVertexBufferD3D geometry;
+        FSeek(doffset);        
+    }
+};
+
+// ### rage::grmGeometryQB ###
+struct grmGeometryQB {
+    DWORD       _vmt <format=hex>;
+    DWORD       m_piVertexDeclaration;
+    DWORD       _f8;
+    pgPtr_grcVertexBufferD3D    m_vertexBuffers[4] <optimize=false>;
+    pgPtr_grcIndexBufferD3D     m_indexBuffers[4] <optimize=false>; 
+    DWORD       m_dwIndexCount;
+    DWORD       m_dwFaceCount;
+    WORD        m_wVertexCount;
+    WORD        m_wIndicesPerFace;
+    pgPtr       _f38;
+    WORD        m_wVertexStride;
+    WORD        _f3E;
+    pgPtr       m_pVertexDeclaration;
+    pgPtr       _f44;
+    DWORD       _f48;
+};
+
+struct pgPtr_grmGeometryQB {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        grmGeometryQB geometry;
+        FSeek(doffset);        
+    }
+};
+
+struct pgObjectArray_grmGeometryQB {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    WORD    m_wCount;
+    WORD    m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        pgPtr_grmGeometryQB data[m_wSize] <optimize=false>;
+        FSeek(doffset);        
+    }    
+};
+
+// ### rage::grmModel ###
+struct grmModel {
+    DWORD       __vmt <format=hex>;
+    pgObjectArray_grmGeometryQB m_geometries;
+    pgPtr       _fC;    // m_offsets; pointer to float[8*m_wGeometryCount]
+    pgPtr       _f10;   // pointer to WORD[m_wGeometryCount] aru: m_shaderMappings
+    BYTE        _f14;
+    BYTE        _f15;
+    BYTE        _f16;
+    BYTE        _f17;
+    BYTE        _f18;
+    BYTE        _f19;   // m_bHasOffset
+    WORD        m_wGeomeryCount;        
+};
+
+struct pgPtr_grmModel {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        grmModel model;
+        FSeek(doffset);        
+    }
+};
+struct pgObjectArray_grmModel {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    WORD    m_wCount;
+    WORD    m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        pgPtr_grmModel data[m_wSize] <optimize=false>;
+        FSeek(doffset);        
+    }    
+};
+
+typedef struct {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        pgObjectArray_grmModel models;
+        FSeek(doffset);        
+    }
+}pgPtr_pgObjectArray_grmModel <read=pgPtr_pgObjectArray_grmModel_read>;
+string pgPtr_pgObjectArray_grmModel_read (pgPtr_pgObjectArray_grmModel& a) {
+    string s;
+    SPrintf (s, "[%d]", a.type == 5 ? a.models.m_wSize : 0);
+    return s;
+}
+
+// ### rage::grmLodGroup
+struct grmLodGroup {
+    Vector3 m_vCenter;
+    Vector3 m_vBoundsMax;
+    Vector3 m_vBoundsMin;
+    pgPtr_pgObjectArray_grmModel   m_models[4] <optimize=false>;
+    float   _f40[4];
+    int     m_totalGeometryCount[4];
+    float   m_fRadius;  
+    float   _f64[3];    // always zero
+};
+
+// ### CLightAttr ###
+struct CLightAttr {
+    DWORD   __vmt<format=hex>;
+    BYTE    data[0x68] <format=hex>;
+};
+
+struct pgArray_CLightAttr {
+    int offset: 28 <format=hex>;
+    int type: 4;
+    WORD    m_wCount;
+    WORD    m_wSize;
+    if (type == 5) {
+        local uint doffset = FTell();
+        FSeek(offset);
+        CLightAttr lightAttrs[m_wSize] <optimize=false>;
+        FSeek(doffset);        
+    }
+};
+
+// ### rage::phBound (with subclasses) ### 
+typedef enum<uchar> {
+    BoundSphere = 0,
+    BoundCapsule = 1,
+    BoundBox = 3,
+    BoundGeometry = 4,
+    BoundCurvedGeometry = 5,
+    BoundOctree = 6,
+    BoundQuadtree = 7,
+    BoundGrid = 8,
+    BoundRibbon = 9,
+    BoundBVH = 10,
+    BoundSurface = 11,
+    BoundComposite = 12
+} BoundType;
+
+struct phBoundBox_obj1 {
+    Vector4 _f0;
+    WORD    _f10[4];
+    WORD    _f18[4];
+};  
+
+struct phBoundBVH_obj1 {    // ::_fE0
+    struct {
+        DWORD   fixup <format=hex>;
+        DWORD   dwCount;
+        DWORD   dwSize;
+        if ((fixup >> 28) == 5) {
+            local int offset = FTell ();
+            FSeek (fixup & 0x0FFFFFFF);
+            struct {
+                WORD    _f0;
+                WORD    _f2;
+                WORD    _f4;
+                WORD    _f6;
+                WORD    _f8;
+                WORD    _fA;
+                WORD    _fC;
+                BYTE    _fE;
+                BYTE    __pad_F;
+            } data[dwSize] <optimize=false>;
+            FSeek (offset);
+        }
+    } _f0;
+
+    DWORD   __pad_0C <format=hex>;   // uninitialized
+    Vector3     _f10;
+    Vector3     _f20;
+    Vector3     _f30;
+    Vector3     _f40;
+    struct {
+        DWORD   fixup;
+        WORD    m_wCount;
+        WORD    m_wSize;
+        if ((fixup >> 28) == 5) {
+            local int offset = FTell ();
+            FSeek (fixup & 0x0FFFFFFF);
+            struct {
+                WORD    _f0;
+                WORD    _f2;
+                WORD    _f4;
+                WORD    _f6;
+                WORD    _f8;
+                WORD    _fA;
+                WORD    _fC;
+                WORD    _fE;
+            } polys [m_wSize] <optimize=false>;
+            FSeek (offset);
+        }
+    } _f50;
+};
+
+struct pgPtr_bvh_obj1 {
+    DWORD   fixup <format=hex>;
+    if ((fixup >> 28) == 5) {
+        local int doffset = FTell ();
+        FSeek (fixup&0x0FFFFFFF);
+        phBoundBVH_obj1 p;
+        FSeek (doffset);
+    }
+};
+
+struct Vertex {
+    WORD    x;
+    WORD    y;
+    WORD    z;
+}; 
+
+struct pgPtr_phBound;
+struct pgObjectArray_phBound;
+
+struct phBound {
+    SetBackColor (0xD0D0D0);
+    uint        __vmt <format=hex>;
+    SetBackColor (currentColor);
+    BoundType   m_eShape;
+    uchar       _f5; // m_vCentroid != { 0, 0, 0}
+    uchar       _f6; // m_bHaveVertices ? (set if m_vCG present)
+    uchar       _f7;
+    float       _f8;
+    float       _fC;
+    Vector3     m_vLocalAabbMax;
+    Vector3     m_vLocalAabbMin;
+    Vector3     m_vCentroid;
+    Vector3     _f40;
+    Vector3     m_vCG;
+    float       _f60;
+    float       _f64;
+    float       _f68;
+    float       _f6C;
+    D3DVECTOR   m_vMargin;
+    DWORD       _f7C;   // 4-byte aligned field, placed instead padding in Vector3 _f70;
+    // >> rage::phBound ends here
+    // subclasses (divide into the separate structs ?)
+    switch (m_eShape) {
+    case BoundSphere:
+        Vector3 _f80;
+        DWORD   _f90;
+        DWORD   _f94;
+        DWORD   _f98;
+        DWORD   _f9C;
+        break;
+    case BoundCapsule:
+        Vector3 _f80;
+        Vector3 _f90;
+        Vector4 _fA0;
+        Vector4 _fB0;
+        Vector3 _fC0;
+        DWORD   _fD0;
+        DWORD   _fD4;
+        DWORD   _fD8;
+        DWORD   _fDC;
+        break;
+    case BoundGrid:
+        float   _f80;
+        float   _f84;
+        DWORD   _f88;
+        DWORD   _f8C;
+        DWORD   _f90;
+        DWORD   _f94;
+        DWORD   _f98;
+        DWORD   _f9C;
+        pgObjectArray_phBound   _fA0;
+        DWORD   _fA8;
+        BYTE    _fAC;
+        BYTE    _fAD;
+        WORD    _fAE;
+        break;
+    case BoundRibbon:
+        pgArray_DWORD   _f80;
+        pgPtr           _f88;
+        pgPtr           _f8C;
+        pgPtr           _f90;
+        pgPtr           _f94;
+        pgPtr           _f98;
+        pgPtr           _f9C;
+        pgPtr           _fA0;
+        pgPtr           _fA4;
+        pgPtr           _fA8;
+        pgPtr           _fAC;
+        pgPtr           _fB0;
+        DWORD           _fB4;
+        DWORD           _fB8;
+        DWORD           _fBC;
+        float           _fC0;
+        DWORD           _fC4;
+        DWORD           _fC8;
+        DWORD           _fCC;
+        DWORD           _fD0;
+        DWORD           _fD4;
+        DWORD           _fD8;
+        DWORD           _fDC;
+        break;
+    case BoundSurface:
+        break;
+    case BoundComposite:
+        local int doffset = FTell ();
+        local int childCount = ReadUShort (doffset+16);
+        struct {
+            uint offset: 28 <format=hex>;
+            uint type: 4; 
+            if (type == 5) {
+                FSeek (offset);
+                pgPtr_phBound data[childCount]<optimize=false>;
+                FSeek (doffset+4);
+            }
+        } m_ppChildren;
+        struct {
+            uint offset: 28 <format=hex>;
+            uint type: 4; 
+            if (type == 5) {
+                FSeek (offset);
+                Matrix34 data[childCount]<optimize=false>; // used _f92 instead childCount
+                FSeek (doffset+8);
+            }            
+        } m_pChildTransforms;
+        struct {
+            uint offset: 28 <format=hex>;
+            uint type: 4; 
+            if (type == 5) {
+                FSeek (offset);
+                Matrix34 data[childCount]<optimize=false>;
+                FSeek (doffset+12);
+            }            
+        } _f88; // m_pCurrentChildTransforms ? (used if allowInternalMotion is set)
+        struct {
+            uint offset: 28 <format=hex>;
+            uint type: 4; 
+            if (type == 5) {
+                FSeek (offset);
+                struct {
+                    Vector3 a;
+                    Vector3 b;
+                } data [childCount]<optimize=false>;
+                FSeek (doffset+16);
+            }            
+        } _f8C; // m_pChildrenAabb ?
+        WORD    m_wChildCount;
+        WORD    m_wChildTransformCount;
+        DWORD   _f94;
+        BYTE    _f98[8];        
+        break;
+//    case BoundPolyhedron:
+    case BoundGeometry:
+    case BoundCurvedGeometry:
+    case BoundBox:
+    case BoundOctree:
+    case BoundQuadtree:
+    case BoundBVH:
+        DWORD   _f80;
+//        pgPtr   _f84; // phBoundGeometry::m_pVertices
+        struct {
+            DWORD   fixup <format=hex>;
+            if ((fixup >> 28) == 5) {
+                local int voffset = FTell ();
+                local int vertexCount = ReadUInt (voffset+64);  // _fC8
+                FSeek (fixup & 0x0FFFFFFF);
+                Vertex vertices [vertexCount];
+                FSeek (voffset);
+            }
+        } m_pVertices2;
+        pgPtr   _f88;
+        struct {
+            DWORD   fixup <format=hex>;
+            if ((fixup >> 28) == 5) {
+                local int offset = FTell ();
+                local int polyCount = ReadUInt (offset+60); // _fCC                
+                FSeek (fixup & 0x0FFFFFFF);
+                struct {
+                    float   _f0;
+                    float   _f4;
+                    float   _f8;
+                    float   _fC;
+                    WORD    _f10[4];
+                    WORD    _f18[4];
+                } poly[polyCount] <optimize=false>;
+                FSeek (offset);
+            }
+        } _f8C;
+        Vector3 _f90;
+        Vector3 _fA0;
+        struct {
+            DWORD   fixup <format=hex>;
+            if ((fixup >> 28) == 5) {
+                local int voffset = FTell ();
+                local int vertexCount = ReadUInt (voffset+20);  // _fC8
+                FSeek (fixup & 0x0FFFFFFF);
+                Vertex vertices [vertexCount];
+                FSeek (voffset);
+            }
+        } m_pVertices;
+        pgPtr   _fB4;
+        BYTE    _fB8;
+        BYTE    _fB9[3];    // uninitialized
+        WORD    _fBC;
+        WORD    _fBE;
+        DWORD   _fC0;
+        DWORD   _fC4;
+        DWORD   m_dwVertexCount;
+        DWORD   m_dwPolyCount;
+        // >> rage::phBoundPolyhedron ends here
+        switch (m_eShape) {
+        case BoundBox:
+            Vector3 _fD0;
+            Vector3 _fE0;
+            Vector3 _fF0;
+            Vector3 _f100;  
+            Vector3 _f110;
+            Vector3 _f120;
+            Vector3 _f130;
+            Vector3 _f140;
+            Vector3 _f160;
+            phBoundBox_obj1 _f160[6];
+            DWORD   _f220;
+            DWORD   _f224;
+            DWORD   _f228;
+            DWORD   _f22C;
+            DWORD   _f230;
+            DWORD   _f234;
+            DWORD   _f238;
+            DWORD   _f23C;
+            break;
+        case BoundGeometry:
+        case BoundCurvedGeometry:
+        case BoundOctree:
+        case BoundQuadtree:
+        case BoundBVH:
+            // pgPtr   m_pMaterials; // DWORD[m_nbMaterialCount]
+            struct {
+                DWORD fixup <format=hex>;
+                if ((fixup >> 28) == 5) {
+                    local int offset = FTell ();
+                    local int materialCount = ReadByte (offset+4);
+                    FSeek (fixup & 0x0FFFFFFF);
+                    DWORD   materials[materialCount]<optimize=false>;
+                    FSeek (offset);
+                } 
+            } m_pMaterials;
+            DWORD   _fD4;
+            BYTE    m_nbMaterialCount;
+            DWORD   _fD9;
+            WORD    _fDD;
+            BYTE    _fDF;
+            if (m_eShape == BoundCurvedGeometry) {
+                pgPtr   _fE0;
+                pgPtr   _fE4;
+                DWORD   m_dwCurvedFaces;
+                DWORD   m_dwCurvedEdges;
+            } else {    // rage::phBoundGeomCullable subclass
+                switch (m_eShape) {
+                case BoundOctree:
+                    pgPtr   _fE0;
+                    DWORD   _fE4;
+                    DWORD   _fE8;
+                    DWORD   _fEC;
+                    break;
+                case BoundQuadtree:
+                    pgPtr   _fE0;
+                    DWORD   _fE4;
+                    DWORD   _fE8;
+                    DWORD   _fEC;
+                    break;
+                case BoundBVH:
+                    pgPtr_bvh_obj1   _fE0;
+                    DWORD   _fE4;
+                    DWORD   _fE8;
+                    DWORD   _fEC;
+                    break;
+                }
+            }
+            break;
+        }
+    break;        
+    }
+};
+
+// ### pgPtr<rage::phBound>
+typedef struct  {
+    uint ptrOff: 28 <format=hex>;
+    uint ptrSeg: 4;
+    if (ptrSeg == 5) {   // RAM location
+        local uint offset = FTell();
+        FSeek(ptrOff);
+        phBound p;
+        FSeek(offset);
+    }
+} pgPtr_phBound <read=phBoundPtr_read>;
+string phBoundPtr_read (pgPtr_phBound& p) {
+  return p.ptrSeg == 5 ? EnumToString (p.p.m_eShape) : "";
+}
+
+// ### pgObjectArray<rage::phBound>
+struct pgObjectArray_phBound {
+    uint ptrOff: 28 <format=hex>;
+    uint ptrSeg: 4;
+    WORD    m_wCount;
+    WORD    m_wSize;
+    if (ptrSeg == 5) {   // RAM location
+        local uint offset = FTell();
+        FSeek(ptrOff);
+        pgPtr_phBound data[m_wSize] <optimize=false>;
+        FSeek(offset);
+    }
+};
+

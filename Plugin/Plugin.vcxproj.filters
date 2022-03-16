@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="byte_pattern.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="font.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="game.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="plugin.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="char_table.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="batch_matching.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_string.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="class_pointer.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_mail_reply.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="whm_table.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\fnv_hash.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_aslr.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="grcTexturePC.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="texture_sprite.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_game.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_font.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_phone.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_menu.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_whm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_benchmark.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_html.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_save.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\stdinc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\module_path.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\common.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="byte_pattern.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="font.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="game.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="plugin.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="char_table.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="batch_matching.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gta_string.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gta_mail_reply.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="whm_table.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\fnv_hash.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gta_aslr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="texture_sprite.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="grcTexturePC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gta_font.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gta_benchmark.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gta_game.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gta_html.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gta_menu.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gta_phone.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gta_whm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="gta_save.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\module_path.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\stdinc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\common.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>
