@@ -3,7 +3,7 @@
 
 static constexpr uint g_CharsPerLine = 64;
 
-#define PLUGIN_USE_FREETYPE 1
+#define PLUGIN_USE_FREETYPE 0
 
 typedef std::uint16_t GTAChar;
 
@@ -17,11 +17,6 @@ struct CRect
 {
     CVector2D bottom_left;
     CVector2D top_right;
-};
-
-struct CharacterPos
-{
-    uint row, column;
 };
 
 struct WhmTextData

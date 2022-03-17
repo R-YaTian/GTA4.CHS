@@ -15,7 +15,7 @@ public:
     template <typename Ret, typename ...Arg>
     Ret call_member_function(std::uintptr_t func_addr, Arg ...args)
     {
-        return reinterpret_cast<Ret(__thiscall*)(void*, Arg...)>(func_addr)(reinterpret_cast<void*>(this), std::forward<Arg>(args)...);
+        return reinterpret_cast<Ret(__thiscall*)(class_pointer*, Arg...)>(func_addr)(this, std::forward<Arg>(args)...);
     }
 
     //TODO: call_virtual_function
