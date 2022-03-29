@@ -141,6 +141,7 @@ public:
 
     //判断字符是否为不能放在行首的标点符号
     static bool IsSpecialPunctuationMark(GTAChar chr);
+    //将特殊字符看作单词的一部分
     static void SkipSpecialPunctuationMarks(const GTAChar*& str);
     static void AddSpecialPunctuationMarksWidth(const GTAChar*& str, float* width);
 

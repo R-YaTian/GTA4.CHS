@@ -22,8 +22,6 @@ const GTAChar* CFont::SkipWord_Prolog(std::uintptr_t address)
         ptr = SkipWord(ptr);
     }
 
-    SkipSpecialPunctuationMarks(ptr);
-
     return ptr;
 }
 
@@ -32,10 +30,9 @@ bool CFont::IsSpecialPunctuationMark(GTAChar chr)
 #if 0
     return false;
 #else
-    //—→、。《》「」『』【】！，－：；？～
+    //—、。《》「」『』！，－：；？～
     return
         //chr == L'—' ||
-        //注释里面的(chr == L'→' ||)
         chr == L'、' ||
         chr == L'。' ||
         //chr == L'《' ||
@@ -44,15 +41,14 @@ bool CFont::IsSpecialPunctuationMark(GTAChar chr)
         chr == L'」' ||
         //chr == L'『' ||
         chr == L'』' ||
-        //chr == L'【' ||
-        chr == L'】' ||
         chr == L'！' ||
         chr == L'，' ||
         //chr == L'－' ||
         chr == L'：' ||
         chr == L'；' ||
         chr == L'？' ||
-        chr == L'～'
+        chr == L'～' ||
+        chr == L'…'
         ;
 #endif
 }
@@ -69,8 +65,7 @@ void CFont::AddSpecialPunctuationMarksWidth(const GTAChar*& str, float* width)
 {
     while (IsSpecialPunctuationMark(*str))
     {
-        *width += GetCharacterSizeNormalDispatch(*str - 0x20);
-        ++str;
+        *width += GetCharacterSizeNormalDispatch(*str++ - 0x20);
     }
 }
 
@@ -287,8 +282,6 @@ float CFont::GetStringWidthRemake(const GTAChar* str, bool get_all)
             //跳过后边的'~'
             ++str;
 
-            AddSpecialPunctuationMarksWidth(str, &current_width);
-
             //处理token后立即判断分词，配合ProcessString逻辑
             if (!get_all)
             {
@@ -302,8 +295,6 @@ float CFont::GetStringWidthRemake(const GTAChar* str, bool get_all)
         current_width += GetCharacterSizeNormalDispatch(chr - 0x20);
         had_word = true;
         ++str;
-
-        AddSpecialPunctuationMarksWidth(str, &current_width);
 
         //计算汉字宽度之后立即判断一次分词
         if (!IsNativeChar(chr) && !get_all)
@@ -349,7 +340,7 @@ float CFont::GetCharacterSizeNormalDispatch(GTAChar chr)
 #if PLUGIN_USE_FREETYPE
         }
 #endif
-    }
+}
 }
 
 float CFont::GetCHSCharacterSizeDrawing(bool use_extra_width)
